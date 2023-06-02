@@ -19,7 +19,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'api.apps.ApiConfig',
     'recipes.apps.RecipesConfig',
+    'users.apps.UsersConfig',
     'rest_framework',
     'colorfield'
 ]
@@ -96,7 +98,10 @@ USE_L10N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
+# Static files + Media
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_URL = '/static_backend/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static_backend')
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
