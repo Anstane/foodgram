@@ -41,7 +41,7 @@ class CustomUser(AbstractUser):
     )
 
     class Meta:
-        ordering = ('username')
+        ordering = ('username',)
         verbose_name = 'user'
         verbose_name_plural = 'users'
 

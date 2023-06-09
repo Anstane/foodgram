@@ -53,7 +53,7 @@ class Recipe(models.Model):
         through='IngredientRecipe'
     )
     image = models.ImageField(
-        upload_to='/media/images/', 
+        upload_to='recipes/', 
         null=False,
         blank=False
     )
@@ -65,7 +65,7 @@ class Recipe(models.Model):
     cooking_time = models.PositiveIntegerField()
 
     class Meta:
-        ordering = ('-pub_date')
+        ordering = ('-pub_date',)
         verbose_name = 'recipe'
         verbose_name_plural = 'recipes'
     
