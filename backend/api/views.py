@@ -13,9 +13,21 @@ from users.models import (
     Subscribe
 )
 from .serializers import (
+    CustomUserSerializer,
+    SubscribeSerializer,
     TagSerializer,
-    IngredientSerializer
+    IngredientSerializer,
+    IngredientRecipeSerializer,
+    RecipeGetSerializer,
+    RecipePostSerializer,
+    ShoppingCartSerializer,
+    FavoriteSerializer
 )
+
+
+# class CustomUserViewSet(viewsets.ModelViewSet):
+#     queryset = CustomUser.objects.all()
+#     serializer_class = CustomUserSerializer
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -26,3 +38,12 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+
+
+class RecipeViewSet(viewsets.ModelViewSet):
+    queryset = Recipe.objects.all()
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return RecipeGetSerializer
+        return RecipePostSerializer
