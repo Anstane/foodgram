@@ -17,7 +17,6 @@ from .serializers import (
     SubscribeSerializer,
     TagSerializer,
     IngredientSerializer,
-    IngredientRecipeSerializer,
     RecipeGetSerializer,
     RecipePostSerializer,
     ShoppingCartSerializer,

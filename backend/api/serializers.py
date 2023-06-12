@@ -27,19 +27,40 @@ class SubscribeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class FavoriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Favorite
+        fields = '__all__'
+
+
+class ShoppingCartSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ShoppingCart
+        fields = '__all__'
+
+
 class TagSerializer(serializers.ModelSerializer):
+    """Сериализатор модели Tag."""
+
     class Meta:
         model = Tag
         fields = '__all__'
 
 
 class IngredientSerializer(serializers.ModelSerializer):
+    """Сериализатор модели Ingredient."""
+
     class Meta:
         model = Ingredient
         fields = '__all__'
 
 
 class IngredientRecipeGetSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор для смежной модели IngredientRecipe,
+    используется для обработки GET запросов.
+    """
+
     id = serializers.ReadOnlyField(
         source='ingredient.id'
     )
@@ -55,22 +76,30 @@ class IngredientRecipeGetSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'amount', 'measurement_unit',)
 
 
+class IngredientRecipePostSerializer(serializers.ModelSerializer):
+    id = serializers.PrimaryKeyRelatedField(
+        source='ingredient.id', queryset=Ingredient.objects.all(),
+    )
+    amount = serializers.IntegerField(write_only=True,)
+
+    class Meta:
+        model = IngredientRecipe
+        fields = ('id', 'amount',)
+
+
 class RecipeGetSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор модели Recipe,
+    принимает в себя поля без возможности редактирования,
+    обрабатывает GET запросы.
+    """
+
     tags = TagSerializer(many=True,)
     ingredients = IngredientRecipeGetSerializer(read_only=True, many=True,)
 
     class Meta:
         model = Recipe
         fields = '__all__'
-
-
-class IngredientRecipePostSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(write_only=True,)
-    amount = serializers.IntegerField(write_only=True,)
-
-    class Meta:
-        model = IngredientRecipe
-        fields = ('id', 'amount',)
 
 
 class RecipePostSerializer(serializers.ModelSerializer):
@@ -81,18 +110,4 @@ class RecipePostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = '__all__'
-
-
-# Пока не трогаем
-class FavoriteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Favorite
-        fields = '__all__'
-
-
-# Пока не трогаем
-class ShoppingCartSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ShoppingCart
         fields = '__all__'
