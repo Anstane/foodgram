@@ -39,8 +39,10 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-# Здесь нужно сделать все поля - ReadOnly
-class IngredientRecipeSerializer(serializers.ModelSerializer):
+class IngredientRecipeGetSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField(
+        source='ingredient.id'
+    )
     name = serializers.ReadOnlyField(
         source='ingredient.name'
     )
@@ -50,20 +52,32 @@ class IngredientRecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = IngredientRecipe
-        fields = '__all__'
+        fields = ('id', 'name', 'amount', 'measurement_unit',)
 
 
 class RecipeGetSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True,)
-    ingredients = IngredientRecipeSerializer(read_only=True, many=True,)
+    ingredients = IngredientRecipeGetSerializer(read_only=True, many=True,)
 
     class Meta:
         model = Recipe
         fields = '__all__'
 
-# Отдельный класс для публикации рецептов
-# Здесь нужно сделать так, чтобы поля ingredients и tags можно было записывать
+
+class IngredientRecipePostSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(write_only=True,)
+    amount = serializers.IntegerField(write_only=True,)
+
+    class Meta:
+        model = IngredientRecipe
+        fields = ('id', 'amount',)
+
+
 class RecipePostSerializer(serializers.ModelSerializer):
+    tags = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Tag.objects.all(),
+    )
+    ingredients = IngredientRecipePostSerializer(many=True)
 
     class Meta:
         model = Recipe
