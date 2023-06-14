@@ -5,73 +5,67 @@ from django.contrib.auth.models import AbstractUser
 class CustomUser(AbstractUser):
     """Класс экземпляра пользователя."""
 
-    USER = 'user'
-    ADMIN = 'admin'
-
-    ROLE_CHOICES = (
-        (USER, 'Пользователь'),
-        (ADMIN, 'Администратор')
-    )
-
-    username = models.CharField(
-        'Логин',
-        max_length=50,
+    email = models.EmailField(
+        verbose_name='Почта',
+        max_length=255,
         unique=True
     )
-    email = models.EmailField(
-        'Почта',
+    username = models.CharField(
+        verbose_name='Логин',
         max_length=100,
         unique=True
     )
     first_name = models.CharField(
-        'Имя',
+        verbose_name='Имя',
         max_length=50
     )
     last_name = models.CharField(
-        'Фамилия',
+        verbose_name='Фамилия',
         max_length=50
     )
     password = models.CharField(
-        'Пароль',
+        verbose_name='Пароль',
         max_length=50
-    )
-    is_subscribed = models.BooleanField(
-        'Подписка на авторов',
-        default=False
     )
 
     class Meta:
         ordering = ('username',)
-        verbose_name = 'user'
-        verbose_name_plural = 'users'
-
-    @property
-    def is_admin(self):
-        return self.role == self.ADMIN or self.is_superuser
-
-    @property
-    def is_user(self):
-        return self.role == self.USER
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+        constraints = (
+            models.UniqueConstraint(
+                fields=['email', 'username'],
+                name='unique_email_username'
+            ),
+        )
 
     def __str__(self):
         return self.username
 
 
 class Subscribe(models.Model):
+    """
+    Модель подписки с проверкой на уникальность
+    и ограничением подписки на самого юзера.
+    """
+
     user = models.ForeignKey(
         CustomUser,
+        verbose_name='Пользователь',
         on_delete=models.CASCADE,
         related_name='user_subscribe'
     )
     author = models.ForeignKey(
         CustomUser,
+        verbose_name='Автор',
         on_delete=models.CASCADE,
         related_name='author_subscribe'
     )
 
     class Meta:
-        verbose_name = 'subscribe'
-        verbose_name_plural = 'subscribers'
+        ordering = ('user',)
+        verbose_name = 'Подписчик'
+        verbose_name_plural = 'Подписчики'
         constraints = (
             models.UniqueConstraint(
                 fields=['user', 'author'],

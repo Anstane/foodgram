@@ -18,15 +18,13 @@ from .serializers import (
     TagSerializer,
     IngredientSerializer,
     RecipeGetSerializer,
-    RecipePostSerializer,
-    ShoppingCartSerializer,
-    FavoriteSerializer
+    RecipePostSerializer
 )
 
 
-# class CustomUserViewSet(viewsets.ModelViewSet):
-#     queryset = CustomUser.objects.all()
-#     serializer_class = CustomUserSerializer
+class CustomUserViewSet(viewsets.ModelViewSet):
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserSerializer
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
