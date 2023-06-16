@@ -1,5 +1,12 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, permissions
 
+from .pagination import (
+    CustomPagination
+)
+from .permissions import (
+    IsAuthorOrReadOnly,
+    IsAdminOrReadOnly
+)
 from recipes.models import (
     Tag,
     Ingredient,
@@ -21,10 +28,10 @@ from .serializers import (
     RecipePostSerializer
 )
 
-
 class CustomUserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
+    permission_classes = (permissions.AllowAny,)
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
