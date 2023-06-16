@@ -1,4 +1,4 @@
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, decorators
 from djoser.views import UserViewSet
 
 from .pagination import (
@@ -55,3 +55,19 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if self.request.method == 'GET':
             return RecipeGetSerializer
         return RecipePostSerializer
+
+    @decorators.action(
+        detail=True,
+        methods=['POST', 'DELETE'],
+        permission_classes=(permissions.IsAuthenticated,)
+    )
+    def favorite(self, request, pk):
+        pass
+
+    @decorators.action(
+        detail=True,
+        methods=['POST', 'DELETE'],
+        permission_classes=(permissions.IsAuthenticated,)
+    )
+    def shopping_cart(self, request, pk):
+        pass

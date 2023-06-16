@@ -129,14 +129,17 @@ REST_FRAMEWORK = {
 
 
 # Djoser settings
+# Hide Users - Любой юзер может видеть любого юзера.
 
 DJOSER = {
-    'PERMISSIONS': {
-        'user': ['djoser.permissions.CurrentUserOrAdminOrReadOnly']
-    },
+    'HIDE_USERS': False,
     'SERIALIZERS': {
-        'create_user': 'api.serializers.CreateCustomUserSerializer',
-        'user': 'api.serializers.CustomUserSerializer',
+        'user_create': 'api.serializers.CreateCustomUserSerializer',
         'current_user': 'api.serializers.CustomUserSerializer',
-    }
+        'user': 'api.serializers.CustomUserSerializer',
+    },
+    'PERMISSIONS': {
+        'user': ['rest_framework.permissions.IsAuthenticatedOrReadOnly',],
+        'user_list': ['rest_framework.permissions.AllowAny',]
+    },
 }

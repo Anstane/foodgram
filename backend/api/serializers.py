@@ -6,8 +6,8 @@ from recipes.models import (
     Ingredient,
     Recipe,
     IngredientRecipe,
-    # Favorite,
-    # ShoppingCart
+    Favorite,
+    ShoppingCart
 )
 from users.models import (
     CustomUser,
@@ -50,7 +50,6 @@ class CustomUserSerializer(UserSerializer):
             'username',
             'first_name',
             'last_name',
-            'password',
             'is_subscribed',
         )
     
@@ -180,13 +179,23 @@ class RecipeGetSerializer(serializers.ModelSerializer):
     обрабатывает GET запросы.
     """
 
+    author = CustomUserSerializer()
     tags = TagSerializer(many=True,)
     ingredients = IngredientRecipeGetSerializer(read_only=True, many=True,)
-    author = CustomUserSerializer()
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
         fields = '__all__'
+    
+    def get_is_favorited(self, obj): # Cannot cast AnonymousUser to int. Are you trying to use it in place of User?
+        user = self.context.get('request').user
+        return Favorite.objects.filter(user=user, recipe=obj).exists()
+    
+    def get_is_in_shopping_cart(self, obj):
+        user = self.context.get('request').user
+        return ShoppingCart.objects.filter(user=user, recipe=obj).exists()
 
 
 class RecipePostSerializer(serializers.ModelSerializer):
@@ -195,11 +204,11 @@ class RecipePostSerializer(serializers.ModelSerializer):
     занимается обработкой POST/UPDATE запросов.
     """
     
+    author = CustomUserSerializer(read_only=True)
     tags = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Tag.objects.all(),
     )
     ingredients = IngredientRecipePostSerializer(many=True)
-    author = CustomUserSerializer(read_only=True)
 
     class Meta:
         model = Recipe
