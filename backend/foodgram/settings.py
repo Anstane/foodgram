@@ -126,3 +126,17 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'api.pagination.CustomPagination',
     'PAGE_SIZE': 6,
 }
+
+
+# Djoser settings
+
+DJOSER = {
+    'PERMISSIONS': {
+        'user': ['djoser.permissions.CurrentUserOrAdminOrReadOnly']
+    },
+    'SERIALIZERS': {
+        'create_user': 'api.serializers.CreateCustomUserSerializer',
+        'user': 'api.serializers.CustomUserSerializer',
+        'current_user': 'api.serializers.CustomUserSerializer',
+    }
+}

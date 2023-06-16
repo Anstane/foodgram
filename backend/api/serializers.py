@@ -1,4 +1,5 @@
 from rest_framework import serializers, validators
+from djoser.serializers import UserSerializer
 
 from recipes.models import (
     Tag,
@@ -14,7 +15,27 @@ from users.models import (
 )
 
 
-class CustomUserSerializer(serializers.ModelSerializer):
+class CreateCustomUserSerializer(UserSerializer):
+    """
+    Сериализатор модели CustomUser для создания пользователя.
+    """
+
+    class Meta:
+        model = CustomUser
+        fields = (
+            'id',
+            'email',
+            'username',
+            'first_name',
+            'last_name',
+            'password',
+        )
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
+
+
+class CustomUserSerializer(UserSerializer):
     """
     Сериализатор модели CustomUser с проверкой на наличие подписок у юзера.
     """
@@ -161,6 +182,7 @@ class RecipeGetSerializer(serializers.ModelSerializer):
 
     tags = TagSerializer(many=True,)
     ingredients = IngredientRecipeGetSerializer(read_only=True, many=True,)
+    author = CustomUserSerializer()
 
     class Meta:
         model = Recipe
@@ -177,6 +199,7 @@ class RecipePostSerializer(serializers.ModelSerializer):
         many=True, queryset=Tag.objects.all(),
     )
     ingredients = IngredientRecipePostSerializer(many=True)
+    author = CustomUserSerializer(read_only=True)
 
     class Meta:
         model = Recipe
