@@ -130,3 +130,13 @@ dmypy.json
 
 # .idea
 .idea
+
+# JS Dependency directories
+node_modules/
+
+# JS Log
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

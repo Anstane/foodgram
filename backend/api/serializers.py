@@ -1,5 +1,5 @@
 from rest_framework import serializers, validators
-from djoser.serializers import UserSerializer
+from djoser.serializers import UserCreateSerializer, UserSerializer
 
 from recipes.models import (
     Tag,
@@ -15,7 +15,7 @@ from users.models import (
 )
 
 
-class CreateCustomUserSerializer(UserSerializer):
+class CreateCustomUserSerializer(UserCreateSerializer):
     """
     Сериализатор модели CustomUser для создания пользователя.
     """
@@ -80,9 +80,9 @@ class SubscribeSerializer(CustomUserSerializer):
     Сериализатор модели подписок наследуемый от CustomUserSerializer.
     """
 
-    is_subscribed = serializers.BooleanField(default=True)
+    is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
-    recipes_count = serializers.SerializerMethodField(read_only=True)
+    recipes_count = serializers.SerializerMethodField()
 
     class Meta:
         model = CustomUser
@@ -96,25 +96,39 @@ class SubscribeSerializer(CustomUserSerializer):
             'recipes',
             'recipes_count',
         )
-        read_only_fields = (
-            'email',
-            'username',
-            'first_name',
-            'last_name',
-        )
+    
+    def get_is_subscribed(self, obj):
+        """Проверяем по фильтрам существование подписок."""
+
+        user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
+        return Subscribe.objects.filter(
+            user=user, author=obj
+        ).exists()
 
     def get_recipes(self, obj):
+        """
+        Задаём queryset и context -
+        возвращаем полученные данные из сериализатора рецептов.
+        """
+
+        request = self.context.get('request')
+        if request.user.is_anonymous:
+            return False
         recipes = Recipe.objects.filter(
-            author=obj.author
+            author=obj
         )
         serializer = RecipeShowSerializer(
             recipes,
             many=True,
-            context=self.context
+            context={'request': request}
         )
         return serializer.data
 
     def get_recipes_count(self, obj):
+        """Считаем количество рецептов от автора."""
+
         return Recipe.objects.filter(
             author=obj.author
         ).count()
@@ -179,9 +193,9 @@ class RecipeGetSerializer(serializers.ModelSerializer):
     обрабатывает GET запросы.
     """
 
-    author = CustomUserSerializer()
-    tags = TagSerializer(many=True,)
-    ingredients = IngredientRecipeGetSerializer(read_only=True, many=True,)
+    author = CustomUserSerializer(read_only=True)
+    tags = TagSerializer(many=True)
+    ingredients = IngredientRecipeGetSerializer(read_only=True, many=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
@@ -189,13 +203,21 @@ class RecipeGetSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = '__all__'
     
-    def get_is_favorited(self, obj): # Cannot cast AnonymousUser to int. Are you trying to use it in place of User?
+    def get_is_favorited(self, obj):
         user = self.context.get('request').user
-        return Favorite.objects.filter(user=user, recipe=obj).exists()
-    
+        if user.is_authenticated:
+            return Favorite.objects.filter(
+                user=user, recipe_id=obj.id
+            ).exists()
+        return False
+
     def get_is_in_shopping_cart(self, obj):
         user = self.context.get('request').user
-        return ShoppingCart.objects.filter(user=user, recipe=obj).exists()
+        if user.is_authenticated:
+            return ShoppingCart.objects.filter(
+                user=user, recipe_id=obj.id
+            ).exists()
+        return False
 
 
 class RecipePostSerializer(serializers.ModelSerializer):
