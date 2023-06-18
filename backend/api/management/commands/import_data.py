@@ -7,21 +7,18 @@ from recipes.models import Ingredient
 
 
 class Command(BaseCommand):
-    help = 'Команда для импорта данных из .csv в базу данных проекта'
+    help = 'Команда для импорта данных в базу данных проекта.'
 
     def add_arguments(self, parser):
-        parser.add_argument('csv_file', type=str, help='Путь до csv-файла')
+        parser.add_argument('file', type=str, help='Путь до json-файла.')
 
     def handle(self, *args, **options):
-        if len(args) != 1:
-            raise CommandError('Данные некорректны')
-        
-        csv_file_path = options['csv_file']
+        json_file_path = options['file']
 
-        if not os.path.exists(csv_file_path):
-            raise CommandError('Неверно передан путь до .csv')
+        if not os.path.exists(json_file_path):
+            raise CommandError('Неверно передан путь до файла с данными.')
 
-        with open(csv_file_path, 'r', encoding='UTF-8') as f:
+        with open(json_file_path, 'r', encoding='UTF-8') as f:
             data = json.load(f)
 
             for item in data:
