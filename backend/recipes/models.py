@@ -102,6 +102,32 @@ class IngredientRecipe(models.Model):
         return f'{self.ingredient} {self.amount}'
 
 
+class TagRecipe(models.Model):
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='tag_recipe'
+    )
+    tag = models.ForeignKey(
+        Tag,
+        on_delete=models.CASCADE,
+        related_name='tag_recipe'
+    )
+
+    class Meta:
+        verbose_name = 'tag_recipe'
+        verbose_name_plural = 'tag_recipes'
+        constraints = (
+            models.UniqueConstraint(
+                fields=['recipe', 'tag'],
+                name='unique_recipe_tag'
+            ),
+        )
+
+    def __str__(self):
+        return f'{self.recipe} {self.tag}'
+
+
 class Favorite(models.Model):
     user = models.ForeignKey(
         User,

@@ -6,6 +6,7 @@ from recipes.models import (
     Ingredient,
     Recipe,
     IngredientRecipe,
+    TagRecipe,
     Favorite,
     ShoppingCart
 )
@@ -194,30 +195,41 @@ class RecipeGetSerializer(serializers.ModelSerializer):
     """
 
     author = CustomUserSerializer(read_only=True)
-    tags = TagSerializer(many=True)
+    tags = TagSerializer(read_only=True, many=True)
     ingredients = IngredientRecipeGetSerializer(read_only=True, many=True)
-    is_favorited = serializers.SerializerMethodField()
-    is_in_shopping_cart = serializers.SerializerMethodField()
+    is_favorited = serializers.SerializerMethodField(read_only=True)
+    is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Recipe
-        fields = '__all__'
+        fields = (
+            'id',
+            'tags',
+            'author',
+            'ingredients',
+            'is_favorited',
+            'is_in_shopping_cart',
+            'name',
+            'image',
+            'text',
+            'cooking_time'
+        )
     
     def get_is_favorited(self, obj):
         user = self.context.get('request').user
-        if user.is_authenticated:
-            return Favorite.objects.filter(
-                user=user, recipe_id=obj.id
-            ).exists()
-        return False
+        if user.is_anonymous:
+            return False
+        return Favorite.objects.filter(
+            user=user, recipe=obj
+        ).exists()
 
     def get_is_in_shopping_cart(self, obj):
         user = self.context.get('request').user
-        if user.is_authenticated:
-            return ShoppingCart.objects.filter(
-                user=user, recipe_id=obj.id
-            ).exists()
-        return False
+        if user.is_anonymous:
+            return False
+        return ShoppingCart.objects.filter(
+            user=user, recipe=obj
+        ).exists()
 
 
 class RecipePostSerializer(serializers.ModelSerializer):
@@ -234,4 +246,66 @@ class RecipePostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = '__all__'
+        fields = (
+            'id',
+            'tags',
+            'author',
+            'ingredients',
+            'image',
+            'name',
+            'text',
+            'cooking_time'
+        )
+
+    def create_tags(tags, recipe):
+        """Метод для записи тегов в смежную модель."""
+
+        for tag in tags:
+            TagRecipe.objects.create(
+                recipe=recipe,
+                tag=tag
+            )
+    
+    def create_ingredients(ingredients, recipe):
+        """Метод для записи ингредиентов в смежную модель."""
+
+        for ingredient in ingredients:
+            IngredientRecipe.objects.create(
+                recipe=recipe,
+                ingredients=ingredient['id'],
+                amount=ingredient['amount']
+            )
+
+    def create(self, validated_data):
+        """
+        Переопределяем метод create для корректной записи тегов и ингредиентов.
+        """
+
+        tags = validated_data.pop('tags')
+        ingredients = validated_data.pop('ingredients')
+        author = self.context.get('request').user
+        recipe = Recipe.objects.create(author=author, **validated_data)
+        self.create_tags(tags, recipe)
+        self.create_ingredients(ingredients, recipe)
+
+        return recipe
+
+    def update(self, instance, validated_data):
+        """
+        Очищаем старые поля от исходных данных и
+        с помощью метода super() записываем новые данные.
+        """
+
+        TagRecipe.objects.filter(recipe=instance).delete()
+        IngredientRecipe.objects.filter(recipe=instance).delete()
+        tags = validated_data.pop('tags')
+        ingredients = validated_data.pop('ingredients')
+        self.create_tags(tags, instance)
+        self.create_ingredients(ingredients, instance)
+
+        instance.name = validated_data.pop('name')
+        instance.text = validated_data.pop('text')
+        instance.image = validated_data.pop('image', instance.image)
+        instance.cooking_time = validated_data.pop('cooking_time')
+
+        return super().update(instance, validated_data)
