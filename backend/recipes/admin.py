@@ -5,7 +5,6 @@ from .models import (
     Ingredient,
     Recipe,
     IngredientRecipe,
-    TagRecipe,
     Favorite,
     ShoppingCart
 )
@@ -67,32 +66,16 @@ class RecipeAdmin(admin.ModelAdmin):
 @admin.register(IngredientRecipe)
 class IngredientRecipeAdmin(admin.ModelAdmin):
     list_display = (
-        'ingredients',
+        'ingredient',
         'recipe',
         'amount'
     )
     list_filter = (
-        'ingredients',
+        'ingredient',
         'recipe'
     )
     search_fields = (
-        'ingredients',
-        'recipe'
-    )
-
-
-@admin.register(TagRecipe)
-class TagRecipeAdmin(admin.ModelAdmin):
-    list_display = (
-        'tag',
-        'recipe'
-    )
-    list_filter = (
-        'tag',
-        'recipe'
-    )
-    search_fields = (
-        'tag',
+        'ingredient',
         'recipe'
     )
 
