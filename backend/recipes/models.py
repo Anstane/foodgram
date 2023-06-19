@@ -10,12 +10,18 @@ User = get_user_model()
 class Tag(models.Model):
     """Модель экземпляра тегов."""
 
-    name = models.CharField(max_length=256, unique=True)
-    color = ColorField(default='#FF0000')
-    slug = models.SlugField(max_length=50, unique=True)
+    name = models.CharField(
+        max_length=150, unique=True
+    )
+    color = ColorField(
+        default='#FF0000'
+    )
+    slug = models.SlugField(
+        max_length=50, unique=True
+    )
 
     class Meta:
-        verbose_name = 'Тэг'
+        verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
 
     def __str__(self):
@@ -27,9 +33,11 @@ class Ingredient(models.Model):
 
     name = models.CharField(
         db_index=True,
-        max_length=256
+        max_length=150
     )
-    measurement_unit = models.CharField(max_length=10)
+    measurement_unit = models.CharField(
+        max_length=50
+    )
 
     class Meta:
         verbose_name = 'Ингредиент'
@@ -53,8 +61,8 @@ class Recipe(models.Model):
     )
     ingredients = models.ManyToManyField(
         Ingredient,
-        related_name='recipes',
-        through='IngredientRecipe'
+        through='IngredientRecipe',
+        related_name='recipes'
     )
     image = models.ImageField(
         upload_to='recipes/'
@@ -95,8 +103,8 @@ class IngredientRecipe(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Ингредиент-рецепт'
-        verbose_name_plural = 'Ингредиент-рецепты'
+        verbose_name = 'Количество нгредиента'
+        verbose_name_plural = 'Количество нгредиента'
         constraints = (
             models.UniqueConstraint(
                 fields=['recipe', 'ingredient'],
@@ -119,6 +127,8 @@ class Favorite(models.Model):
     )
 
     class Meta:
+        verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранное'
         constraints = (
             models.UniqueConstraint(
                 fields=['user', 'recipe'],
@@ -141,6 +151,8 @@ class ShoppingCart(models.Model):
     )
 
     class Meta:
+        verbose_name = 'Корзина покупок'
+        verbose_name_plural = 'Корзина покупок'
         constraints = (
             models.UniqueConstraint(
                 fields=['user', 'recipe'],
