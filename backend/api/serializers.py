@@ -25,6 +25,7 @@ class CreateCustomUserSerializer(UserCreateSerializer):
     class Meta:
         model = CustomUser
         fields = (
+            'id',
             'email',
             'username',
             'first_name',
@@ -131,7 +132,7 @@ class SubscribeSerializer(CustomUserSerializer):
         """Считаем количество рецептов от автора."""
 
         return Recipe.objects.filter(
-            author=obj.author
+            author=obj
         ).count()
 
 

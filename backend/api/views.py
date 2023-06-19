@@ -1,11 +1,9 @@
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, permissions, decorators, status
 from rest_framework.response import Response
 from djoser.views import UserViewSet
 
-from .pagination import (
-    CustomPagination
-)
 from .permissions import (
     IsAuthorOrReadOnly,
     IsAdminOrReadOnly
@@ -42,9 +40,9 @@ class CustomUserViewSet(UserViewSet):
         methods=['GET'],
         permission_classes=(permissions.IsAuthenticated,)
     )
-    def get_sub(self, request):
+    def subscriptions(self, request):
         user = request.user
-        queryset = Subscribe.objects.filter(user=user)
+        queryset = CustomUser.objects.filter(following__user=user)
         page = self.paginate_queryset(queryset)
         serializer = SubscribeSerializer(
             page, many=True, context={'request': request}
@@ -52,11 +50,11 @@ class CustomUserViewSet(UserViewSet):
         return self.get_paginated_response(serializer.data)
 
     @decorators.action(
-        detail=False,
+        detail=True,
         methods=['POST', 'DELETE'],
         permission_classes=(permissions.IsAuthenticated,)
     )
-    def post_del_sub(self, request):
+    def subscribe(self, request, id):
         user = request.user
         author = get_object_or_404(CustomUser, id=id)
 

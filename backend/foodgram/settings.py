@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     'colorfield',
     'rest_framework.authtoken',
     'djoser',
+    'django_filters'
 ]
 
 MIDDLEWARE = [
@@ -130,8 +131,10 @@ REST_FRAMEWORK = {
 
 # Djoser settings
 # Hide Users - Любой юзер может видеть любого юзера.
+# Login field - делаем так, чтобы почта передавалась в виде логина.
 
 DJOSER = {
+    'LOGIN_FIELD': 'email',
     'HIDE_USERS': False,
     'SERIALIZERS': {
         'user_create': 'api.serializers.CreateCustomUserSerializer',
