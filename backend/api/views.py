@@ -28,7 +28,8 @@ from .serializers import (
     TagSerializer,
     IngredientSerializer,
     RecipeGetSerializer,
-    RecipePostSerializer
+    RecipePostSerializer,
+    RecipeShowSerializer
 )
 
 class CustomUserViewSet(UserViewSet):
@@ -111,7 +112,20 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=(permissions.IsAuthenticated,)
     )
     def favorite(self, request, pk):
-        pass
+        user = self.request.user
+        recipe = get_object_or_404(Recipe, pk=pk)
+
+        if self.request.method == 'POST':
+            Favorite.objects.create(user=user, recipe=recipe)
+            serializer = RecipeShowSerializer(
+                recipe, context={'request': request}
+            )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        if self.request.method == 'DELETE':
+            favorite = Favorite.objects.get(user=user, recipe=recipe)
+            favorite.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
     @decorators.action(
         detail=True,
@@ -119,4 +133,25 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=(permissions.IsAuthenticated,)
     )
     def shopping_cart(self, request, pk):
+        user = self.request.user
+        recipe = get_object_or_404(Recipe, pk=pk)
+
+        if self.request.method == 'POST':
+            ShoppingCart.objects.create(user=user, recipe=recipe)
+            serializer = RecipeShowSerializer(
+                recipe, context={'request': request}
+            )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        if self.request.method == 'DELETE':
+            shopping_cart = ShoppingCart.objects.get(user=user, recipe=recipe)
+            shopping_cart.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    @decorators.action(
+        detail=False,
+        methods=['GET'],
+        permission_classes=(permissions.IsAuthenticated,)
+    )
+    def download_shopping_cart(self, request):
         pass
