@@ -9,7 +9,7 @@ import uuid
 class Base64ImageField(serializers.ImageField):
     """Сериализатор для преобразования формата картинки."""
 
-    def to_internal_value(self, data):                
+    def to_internal_value(self, data):
         if isinstance(data, six.string_types):
             if 'data:' in data and ';base64,' in data:
                 header, data = data.split(';base64,')

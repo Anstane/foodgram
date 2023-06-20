@@ -1,5 +1,4 @@
 from djoser.serializers import UserCreateSerializer, UserSerializer
-from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from recipes.models import (
@@ -37,6 +36,8 @@ class CreateCustomUserSerializer(UserCreateSerializer):
         }
 
     def validate_username(self, value):
+        """Проверяем, что имя пользователя != me."""
+
         if value.lower() == 'me':
             raise serializers.ValidationError(
                 "Имя зарезервировано."
@@ -104,7 +105,7 @@ class SubscribeSerializer(CustomUserSerializer):
             'recipes',
             'recipes_count',
         )
-    
+
     def get_is_subscribed(self, obj):
         """Проверяем существование подписок."""
 
@@ -221,7 +222,7 @@ class RecipeGetSerializer(serializers.ModelSerializer):
             'text',
             'cooking_time'
         )
-    
+
     def get_is_favorited(self, obj):
         """Ищем объект в модели Favorite."""
 
@@ -260,7 +261,7 @@ class RecipePostSerializer(serializers.ModelSerializer):
     """
     Сериализатор модели Recipe - POST и PATCH методы.
     """
-    
+
     author = serializers.HiddenField(
         default=CustomUserSerializer()
     )
@@ -285,12 +286,16 @@ class RecipePostSerializer(serializers.ModelSerializer):
         )
 
     def validate_tags(self, value):
+        """Валидируем наличие тега."""
+
         if not value:
             raise serializers.ValidationError(
                 "Нужно передать как минимум 1 тег."
             )
 
     def validate_ingredients(self, value):
+        """Валидируем наличие ингредиентов."""
+
         if not value:
             raise serializers.ValidationError(
                 "Нужно передать как минимум 1 ингредиент."

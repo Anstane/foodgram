@@ -1,7 +1,14 @@
+from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, permissions, decorators, status, filters
 from rest_framework.response import Response
+from rest_framework import (
+    viewsets,
+    permissions,
+    decorators,
+    status,
+    filters
+)
 from djoser.views import UserViewSet
 
 from .filters import (
@@ -33,6 +40,7 @@ from .serializers import (
     RecipePostSerializer,
     RecipeShowSerializer
 )
+
 
 class CustomUserViewSet(UserViewSet):
     queryset = CustomUser.objects.all()
@@ -76,7 +84,7 @@ class CustomUserViewSet(UserViewSet):
             )
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        
+
         if request.method == 'DELETE':
 
             if not Subscribe.objects.filter(user=user, author=author).exists():
@@ -144,7 +152,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             )
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        
+
         if self.request.method == 'DELETE':
             if not Favorite.objects.filter(user=user, recipe=recipe).exists():
                 return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -165,7 +173,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
         if self.request.method == 'POST':
 
-            if ShoppingCart.objects.filter(user=user, recipe=recipe).exists():
+            if ShoppingCart.objects.filter(
+                user=user, recipe=recipe
+            ).exists():
                 return Response(status=status.HTTP_400_BAD_REQUEST)
 
             ShoppingCart.objects.create(user=user, recipe=recipe)
@@ -174,21 +184,51 @@ class RecipeViewSet(viewsets.ModelViewSet):
             )
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        
+
         if self.request.method == 'DELETE':
 
-            if not ShoppingCart.objects.filter(user=user, recipe=recipe).exists():
+            if not ShoppingCart.objects.filter(
+                user=user, recipe=recipe
+            ).exists():
                 return Response(status=status.HTTP_400_BAD_REQUEST)
 
             shopping_cart = ShoppingCart.objects.get(user=user, recipe=recipe)
             shopping_cart.delete()
 
             return Response(status=status.HTTP_204_NO_CONTENT)
-    
+
     @decorators.action(
         detail=False,
         methods=['GET'],
         permission_classes=(permissions.IsAuthenticated,)
     )
     def download_shopping_cart(self, request):
-        pass
+        file = 'shopping-list.txt'
+        user = self.request.user
+        cart_recipe = ShoppingCart.objects.filter(
+            user=user
+        )  # Получили рецепты из ShoppingCart`а
+        shop_cart = {}
+
+        with open(file, 'w') as f:
+            for cart in cart_recipe:  # Получаем ингредиенты из рецептов
+                ingredients = IngredientRecipe.objects.filter(
+                    recipe=cart.recipe
+                )
+
+                for ing_a in ingredients:  # Наполняем словарь
+                    ing_m = Ingredient.objects.get(
+                        pk=ing_a.ingredient.id
+                    )
+                    position = f'{ing_m.name} {ing_m.measurement_unit}'
+
+                    if position in shop_cart.keys():
+                        shop_cart[position] += ing_a.amount
+                    else:
+                        shop_cart[position] = ing_a.amount
+
+            # Записываем айтемы словаря в список
+            for unit, amount in shop_cart.items():
+                f.write(f'{unit} - {amount}\n')
+
+        return FileResponse(file, as_attachment=True)

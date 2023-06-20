@@ -80,7 +80,7 @@ class Recipe(models.Model):
         ordering = ('-pub_date',)
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
-    
+
     def __str__(self):
         return self.name
 
@@ -96,7 +96,7 @@ class IngredientRecipe(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='ingredient_recipe'    
+        related_name='ingredient_recipe',
     )
     amount = models.PositiveIntegerField(
         validators=[MinValueValidator(1)]
@@ -117,13 +117,17 @@ class IngredientRecipe(models.Model):
 
 
 class Favorite(models.Model):
+    """Модель избранное."""
+
     user = models.ForeignKey(
         User,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='in_favorite'
     )
     recipe = models.ForeignKey(
         Recipe,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='in_favorite'
     )
 
     class Meta:
@@ -135,19 +139,23 @@ class Favorite(models.Model):
                 name='unique_user_recipe'
             ),
         )
-    
+
     def __str__(self):
         return f'{self.user} {self.recipe}'
 
 
 class ShoppingCart(models.Model):
+    """Модель корзина покупок."""
+
     user = models.ForeignKey(
         User,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='in_shopping_cart'
     )
     recipe = models.ForeignKey(
         Recipe,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='in_shopping_cart'
     )
 
     class Meta:
