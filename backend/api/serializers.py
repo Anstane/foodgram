@@ -36,6 +36,12 @@ class CreateCustomUserSerializer(UserCreateSerializer):
             'password': {'write_only': True}
         }
 
+    def validate_username(self, value):
+        if value.lower() == 'me':
+            raise serializers.ValidationError(
+                "Имя зарезервировано."
+            )
+
 
 class CustomUserSerializer(UserSerializer):
     """Сериализатор модели CustomUser."""
@@ -52,7 +58,7 @@ class CustomUserSerializer(UserSerializer):
             'last_name',
             'is_subscribed',
         )
-    
+
     def get_is_subscribed(self, obj):
         """Проверяем есть ли у пользователя подписки."""
 
@@ -278,6 +284,17 @@ class RecipePostSerializer(serializers.ModelSerializer):
             'cooking_time'
         )
 
+    def validate_tags(self, value):
+        if not value:
+            raise serializers.ValidationError(
+                "Нужно передать как минимум 1 тег."
+            )
+
+    def validate_ingredients(self, value):
+        if not value:
+            raise serializers.ValidationError(
+                "Нужно передать как минимум 1 ингредиент."
+            )
 
     def add_ingredients(self, ingredients, recipe):
         """Метод для добавления ингредиентов в рецепт."""
