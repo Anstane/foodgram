@@ -292,24 +292,37 @@ class RecipePostSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "Нужно передать как минимум 1 тег."
             )
+        return value
 
     def validate_ingredients(self, value):
-        """Валидируем наличие ингредиентов."""
+        """Валидируем наличие и уникальность ингредиентов."""
 
         if not value:
             raise serializers.ValidationError(
                 "Нужно передать как минимум 1 ингредиент."
             )
+        
+        list = []
+        for ingredient in value:
+            if ingredient['id'] in list:
+                raise serializers.ValidationError(
+                    "Добавить можно только уникальные ингедиенты."
+                )
+            list.append(ingredient['id'])
+        return value
 
     def add_ingredients(self, ingredients, recipe):
         """Метод для добавления ингредиентов в рецепт."""
 
-        for ingredient in ingredients:
-            IngredientRecipe.objects.create(
+        ingredient_list = [
+            IngredientRecipe(
                 ingredient_id=ingredient.get('id'),
                 amount=ingredient.get('amount'),
                 recipe=recipe
             )
+            for ingredient in ingredients
+        ]
+        IngredientRecipe.objects.bulk_create(ingredient_list)
 
     def create(self, validated_data):
         """
@@ -335,11 +348,6 @@ class RecipePostSerializer(serializers.ModelSerializer):
         instance.tags.set(tags)
         instance.ingredient_recipe.all().delete()
         self.add_ingredients(ingredients, instance)
-
-        instance.name = validated_data.pop('name')
-        instance.text = validated_data.pop('text')
-        instance.image = validated_data.pop('image', instance.image)
-        instance.cooking_time = validated_data.pop('cooking_time')
 
         return super().update(instance, validated_data)
 
