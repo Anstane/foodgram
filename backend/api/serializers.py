@@ -302,13 +302,13 @@ class RecipePostSerializer(serializers.ModelSerializer):
                 "Нужно передать как минимум 1 ингредиент."
             )
 
-        list = []
+        ingredient_list = []
         for ingredient in value:
-            if ingredient['id'] in list:
+            if ingredient['id'] in ingredient_list:
                 raise serializers.ValidationError(
                     "Добавить можно только уникальные ингедиенты."
                 )
-            list.append(ingredient['id'])
+            ingredient_list.append(ingredient['id'])
         return value
 
     def add_ingredients(self, ingredients, recipe):
