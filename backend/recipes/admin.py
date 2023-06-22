@@ -63,6 +63,7 @@ class RecipeAdmin(admin.ModelAdmin):
         'text'
     )
 
+
 @admin.register(IngredientRecipe)
 class IngredientRecipeAdmin(admin.ModelAdmin):
     list_display = (
@@ -91,7 +92,7 @@ class FavouriteAdmin(admin.ModelAdmin):
         'recipe'
     )
     search_fields = (
-        'user', 
+        'user',
         'recipe'
     )
 
@@ -107,6 +108,6 @@ class ShoppingCartAdmin(admin.ModelAdmin):
         'recipe'
     )
     search_fields = (
-        'user', 
+        'user',
         'recipe'
     )
