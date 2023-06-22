@@ -301,7 +301,7 @@ class RecipePostSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "Нужно передать как минимум 1 ингредиент."
             )
-        
+
         list = []
         for ingredient in value:
             if ingredient['id'] in list:

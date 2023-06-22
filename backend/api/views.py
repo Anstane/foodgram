@@ -1,4 +1,5 @@
-from django.http import FileResponse
+from django.http import HttpResponse
+from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.response import Response
@@ -172,32 +173,25 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=(permissions.IsAuthenticated,)
     )
     def download_shopping_cart(self, request):
-        file = 'shopping-list.txt'
+        file_name = 'shopping-list.txt'
         user = self.request.user
-        cart_recipe = ShoppingCart.objects.filter(
-            user=user
-        )  # Получили рецепты из ShoppingCart`а
-        shop_cart = {}
-
-        with open(file, 'w') as f:
-            for cart in cart_recipe:  # Получаем ингредиенты из рецептов
-                ingredients = IngredientRecipe.objects.filter(
-                    recipe=cart.recipe
+        ingredients = IngredientRecipe.objects.filter(
+            recipe__in_shopping_cart__user=user
+        ).values_list(
+            'ingredient__name', 'ingredient__measurement_unit'
+        ).annotate(Sum('amount'))
+        lines = []
+        for ingredient in ingredients:
+            lines.append(
+                'Игрединет: {0}. Количество: {1} {2}.'.format(
+                    ingredient[0], ingredient[2], ingredient[1]
                 )
-
-                for ing_a in ingredients:  # Наполняем словарь
-                    ing_m = Ingredient.objects.get(
-                        pk=ing_a.ingredient.id
-                    )
-                    position = f'{ing_m.name} {ing_m.measurement_unit}'
-
-                    if position in shop_cart.keys():
-                        shop_cart[position] += ing_a.amount
-                    else:
-                        shop_cart[position] = ing_a.amount
-
-            # Записываем айтемы словаря в список
-            for unit, amount in shop_cart.items():
-                f.write(f'{unit} - {amount}\n')
-
-        return FileResponse(file, as_attachment=True)
+            )
+        file_content = '\n'.join(lines)
+        response = HttpResponse(
+            file_content, content_type="text/plain,charset=utf8"
+        )
+        response['Content-Disposition'] = 'attachment; filename={0}'.format(
+            file_name
+        )
+        return response
