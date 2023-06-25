@@ -3,8 +3,7 @@ from django.core.validators import MinValueValidator
 from django.contrib.auth import get_user_model
 from django.db import models
 
-
-User = get_user_model()
+from users.models import CustomUser
 
 
 class Tag(models.Model):
@@ -51,9 +50,10 @@ class Recipe(models.Model):
     """Модель экземпляра рецептов."""
 
     author = models.ForeignKey(
-        User,
+        CustomUser,
         on_delete=models.CASCADE,
-        related_name='recipes'
+        related_name='recipes',
+        null=True
     )
     tags = models.ManyToManyField(
         Tag,
@@ -120,14 +120,16 @@ class Favorite(models.Model):
     """Модель избранное."""
 
     user = models.ForeignKey(
-        User,
+        CustomUser,
         on_delete=models.CASCADE,
-        related_name='in_favorite'
+        related_name='in_favorite',
+        null=True
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='in_favorite'
+        related_name='in_favorite',
+        null=True
     )
 
     class Meta:
@@ -136,7 +138,7 @@ class Favorite(models.Model):
         constraints = (
             models.UniqueConstraint(
                 fields=['user', 'recipe'],
-                name='unique_user_recipe'
+                name='unique_favorite'
             ),
         )
 
@@ -148,14 +150,16 @@ class ShoppingCart(models.Model):
     """Модель корзина покупок."""
 
     user = models.ForeignKey(
-        User,
+        CustomUser,
         on_delete=models.CASCADE,
-        related_name='in_shopping_cart'
+        related_name='in_shopping_cart',
+        null=True
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='in_shopping_cart'
+        related_name='in_shopping_cart',
+        null=True
     )
 
     class Meta:
@@ -164,7 +168,7 @@ class ShoppingCart(models.Model):
         constraints = (
             models.UniqueConstraint(
                 fields=['user', 'recipe'],
-                name='unique_user_recipe'
+                name='unique_shopping_cart'
             ),
         )
 
