@@ -141,7 +141,9 @@ REST_FRAMEWORK = {
 # Login field - делаем так, чтобы почта передавалась в виде логина.
 
 DJOSER = {
-    'LOGIN_FIELD': 'email',
+    # 'LOGIN_FIELD': 'email',
+    # 'SEND_ACTIVATION_EMAIL': False,
+    # 'ACTIVATION_URL': False,
     'HIDE_USERS': False,
     'SERIALIZERS': {
         'user_create': 'api.serializers.CreateCustomUserSerializer',
@@ -150,6 +152,7 @@ DJOSER = {
     },
     'PERMISSIONS': {
         'user': ['rest_framework.permissions.IsAuthenticatedOrReadOnly', ],
+        'user_create': ['rest_framework.permissions.AllowAny', ],
         'user_list': ['rest_framework.permissions.AllowAny', ]
     },
 }

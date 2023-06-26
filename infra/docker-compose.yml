@@ -8,9 +8,8 @@ services:
       - pg_data:/var/lib/postgresql/data
 
   backend:
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
+    image: anstane/foodgram_backend
+    restart: always
     env_file: .env
     volumes:
       - static_storage:/app/static_backend/
@@ -19,16 +18,14 @@ services:
       - db
 
   frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+    image: anstane/foodgram_frontend
     volumes:
       - ../frontend/:/app/result_build/
 
   nginx:
     image: nginx:1.19.3
     ports:
-      - "80:80"
+      - "8000:80"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - ../frontend/build:/usr/share/nginx/html/

@@ -5,42 +5,33 @@ from django.contrib.auth.models import AbstractUser
 class CustomUser(AbstractUser):
     """Класс экземпляра пользователя."""
 
-    USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ("username", "first_name", "last_name")
-
     email = models.EmailField(
-        verbose_name='Почта',
+        'Почта',
         max_length=255,
         unique=True
     )
     username = models.CharField(
-        verbose_name='Логин',
+        'Логин',
         max_length=150,
         unique=True
     )
     first_name = models.CharField(
-        verbose_name='Имя',
-        max_length=150
+        'Имя',
+        max_length=150,
+        blank=False
     )
     last_name = models.CharField(
-        verbose_name='Фамилия',
-        max_length=150
+        'Фамилия',
+        max_length=150,
+        blank=False
     )
-    password = models.CharField(
-        verbose_name='Пароль',
-        max_length=150
-    )
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ('username', 'first_name', 'last_name')
 
     class Meta:
         ordering = ('pk',)
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
-        constraints = (
-            models.UniqueConstraint(
-                fields=['email', 'username'],
-                name='unique_email_username'
-            ),
-        )
 
     def __str__(self):
         return self.username
