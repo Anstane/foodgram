@@ -30,14 +30,7 @@ class CreateCustomUserSerializer(UserCreateSerializer):
             'last_name',
             'password',
         )
-
-    def validate_username(self, value):
-        """Проверяем, что имя пользователя != me."""
-
-        if value.lower() == 'me':
-            raise serializers.ValidationError(
-                "Имя зарезервировано."
-            )
+        extra_kwargs = {"password": {"write_only": True}}
 
 
 class CustomUserSerializer(UserSerializer):

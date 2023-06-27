@@ -116,11 +116,11 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static_backend')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Custom User model
 
 AUTH_USER_MODEL = 'users.CustomUser'
-
 
 # Rest Framework settings
 
@@ -141,18 +141,17 @@ REST_FRAMEWORK = {
 # Login field - делаем так, чтобы почта передавалась в виде логина.
 
 DJOSER = {
-    # 'LOGIN_FIELD': 'email',
-    # 'SEND_ACTIVATION_EMAIL': False,
-    # 'ACTIVATION_URL': False,
+    'LOGIN_FIELD': 'email',
     'HIDE_USERS': False,
+    'SEND_ACTIVATION_EMAIL': False,
     'SERIALIZERS': {
         'user_create': 'api.serializers.CreateCustomUserSerializer',
         'current_user': 'api.serializers.CustomUserSerializer',
         'user': 'api.serializers.CustomUserSerializer',
     },
     'PERMISSIONS': {
-        'user': ['rest_framework.permissions.IsAuthenticatedOrReadOnly', ],
-        'user_create': ['rest_framework.permissions.AllowAny', ],
-        'user_list': ['rest_framework.permissions.AllowAny', ]
+        'user': ['rest_framework.permissions.IsAuthenticatedOrReadOnly'],
+        'user_create': ['rest_framework.permissions.AllowAny'],
+        'user_list': ['rest_framework.permissions.AllowAny'],
     },
 }

@@ -1,35 +1,38 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+from .validators import validate_username
+
 
 class CustomUser(AbstractUser):
     """Класс экземпляра пользователя."""
 
     email = models.EmailField(
         'Почта',
-        max_length=255,
+        max_length=150,
         unique=True
     )
     username = models.CharField(
         'Логин',
         max_length=150,
-        unique=True
+        unique=True,
+        validators=(validate_username,)
     )
     first_name = models.CharField(
         'Имя',
-        max_length=150,
-        blank=False
+        max_length=150
     )
     last_name = models.CharField(
         'Фамилия',
-        max_length=150,
-        blank=False
+        max_length=150
     )
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ('username', 'first_name', 'last_name')
+    password = models.CharField(
+        'Пароль',
+        max_length=150
+    )
 
     class Meta:
-        ordering = ('pk',)
+        ordering = ('id',)
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
 
