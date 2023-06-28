@@ -17,8 +17,7 @@ from .filters import (
     RecipeFilter
 )
 from .permissions import (
-    IsAuthorOrReadOnly,
-    IsAdminOrReadOnly
+    IsAuthorOrAdminOrReadOnly
 )
 from recipes.models import (
     Tag,
@@ -111,7 +110,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    permission_classes = (IsAuthorOrReadOnly, IsAdminOrReadOnly,)
+    permission_classes = (IsAuthorOrAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
 

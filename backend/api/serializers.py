@@ -1,4 +1,5 @@
 from djoser.serializers import UserCreateSerializer, UserSerializer
+from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
 from recipes.models import (
@@ -13,7 +14,6 @@ from users.models import (
     CustomUser,
     Subscribe
 )
-from .serializer_fields import Base64ImageField
 
 
 class CreateCustomUserSerializer(UserCreateSerializer):
@@ -62,6 +62,8 @@ class RecipeShowSerializer(serializers.ModelSerializer):
     """
     Короткая модель рецепта для корректного отображения в разделе подписок.
     """
+
+    image = Base64ImageField()
 
     class Meta:
         model = Recipe
