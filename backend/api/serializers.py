@@ -114,17 +114,15 @@ class SubscribeSerializer(CustomUserSerializer):
         """
 
         request = self.context.get('request')
+        recipes_limit = request.GET.get('recipes_limit')
         if request.user.is_anonymous:
             return False
         recipes = Recipe.objects.filter(
             author=obj
         )
-        serializer = RecipeShowSerializer(
-            recipes,
-            many=True,
-            context={'request': request}
-        )
-        return serializer.data
+        if recipes_limit:
+            recipes = recipes[:int(recipes_limit)]
+        return RecipeShowSerializer(recipes, many=True).data
 
     def get_recipes_count(self, obj):
         """Считаем количество рецептов от автора."""
@@ -295,6 +293,10 @@ class RecipePostSerializer(serializers.ModelSerializer):
 
         ingredient_list = []
         for ingredient in value:
+            if ingredient['amount'] <= 0:
+                raise serializers.ValidationError(
+                    'Количество ингредиента не может быть меньше 1.'
+                )
             if ingredient['id'] in ingredient_list:
                 raise serializers.ValidationError(
                     "Добавить можно только уникальные ингедиенты."
